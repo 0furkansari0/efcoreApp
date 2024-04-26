@@ -4,17 +4,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace efcoreApp.Controllers
 {
-    public class OgrenciController : Controller
+    public class OgretmenController : Controller
     {
         private readonly DataContext _context;
-        public OgrenciController(DataContext context)
+        public OgretmenController(DataContext context)
         {
             _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Ogrenciler.ToListAsync());
+            var ogretmenler = await _context.Ogretmenler.ToListAsync();
+            return View(ogretmenler);
         }
 
         public IActionResult Create()
@@ -23,9 +24,10 @@ namespace efcoreApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Ogrenci model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Ogretmen model)
         {
-            _context.Ogrenciler.Add(model);
+            _context.Ogretmenler.Add(model);
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
@@ -37,24 +39,24 @@ namespace efcoreApp.Controllers
                 return NotFound();
             }
 
-            var ogrenci = await _context
-                                .Ogrenciler
-                                .Include(x => x.KursKayitlari)
-                                .ThenInclude(x => x.Kurs)
-                                .FirstOrDefaultAsync(t=>t.OgrenciId == id);
+            var ogretmen = await _context
+                            .Ogretmenler
+                            .Include(x => x.Kurslar)
+                            .FirstOrDefaultAsync(t => t.OgretmenId == id);
 
-            if(ogrenci == null)
+            if(ogretmen == null)
             {
                 return NotFound();
             }
-            return View(ogrenci);
+
+            return View(ogretmen);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int? id, Ogrenci model)
+        public async Task<IActionResult> Edit(int id, Ogretmen model)
         {
-            if(id != model.OgrenciId)
+            if(id != model.OgretmenId)
             {
                 return NotFound();
             }
@@ -65,22 +67,24 @@ namespace efcoreApp.Controllers
                 {
                     _context.Update(model);
                     await _context.SaveChangesAsync();
-                   
+
                 }
-                catch(DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException)
                 {
-                    if(!_context.Ogrenciler.Any(o => o.OgrenciId == model.OgrenciId))
+                    
+                    if(!_context.Ogretmenler.Any(o => o.OgretmenId == model.OgretmenId))
                     {
                         return NotFound();
                     }
                     throw;
                 }
-                 return RedirectToAction("Index");
-                
+
+                return RedirectToAction("Index");
             }
 
-            return View();           
+            return View();
         }
+
         public async Task<IActionResult> Delete(int? id)
         {
             if(id == null)
@@ -88,30 +92,30 @@ namespace efcoreApp.Controllers
                 return NotFound();
             }
 
-            var ogrenci = await _context.Ogrenciler.FindAsync(id);
+            var ogretmen = await _context.Ogretmenler.FirstOrDefaultAsync(t => t.OgretmenId == id);
 
-            if(ogrenci == null)
+            if(ogretmen == null)
             {
                 return NotFound();
             }
 
-            return View(ogrenci);
+            
+            return View(ogretmen);
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete([FromForm]int id)
-        {          
-            var ogrenci = await _context.Ogrenciler.FirstOrDefaultAsync(t=>t.OgrenciId == id);
+        {           
 
-            if(ogrenci == null)
+            var ogretmen = await _context.Ogretmenler.FirstOrDefaultAsync(t => t.OgretmenId == id);
+
+            if(ogretmen == null)
             {
                 return NotFound();
             }
-
-            _context.Ogrenciler.Remove(ogrenci);
+            _context.Ogretmenler.Remove(ogretmen);
             await _context.SaveChangesAsync();
-
+            
             return RedirectToAction("Index");
         }
     }
