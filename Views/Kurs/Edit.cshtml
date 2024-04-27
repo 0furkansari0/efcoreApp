@@ -5,6 +5,7 @@
 <div class="row">
     <div class="col-8">
         <form asp-controller="Kurs" asp-action="Edit" method="post">
+            <div asp-validation-summary="All"></div>
             <input type="hidden" asp-for="KursId">
             <div class="mb-3">
                 <label asp-for="Baslik" class="form-label">Kurs Adı</label>
@@ -12,12 +13,12 @@
             </div>
             <div class="mb-3">
                 <label asp-for="OgretmenId" class="form-label">Öğretmen</label>
-                <select asp-items="ViewBag.Ogretmenler" class="form-control">
+                <select asp-for="OgretmenId" asp-items="ViewBag.Ogretmenler" class="form-select">
                     <option value="">Seçiniz.</option>
                 </select>
             </div>
             
-            <button type="submit" class="btn btn-secondary">Kaydet</button>
+            <button type="submit" class="btn btn-secondary">Kaydet</button>           
         </form>
     </div>
     <div class="col-4">

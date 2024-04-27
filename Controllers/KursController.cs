@@ -29,11 +29,18 @@ namespace efcoreApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Kurs model)
+        public async Task<IActionResult> Create(KursViewModel model)
         {
-            _context.Kurslar.Add(model);
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            if(ModelState.IsValid)
+            {
+                _context.Kurslar.Add(new Kurs(){Baslik=model.Baslik, OgretmenId=model.OgretmenId});
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            
+            ViewBag.Ogretmenler = new SelectList(await _context.Ogretmenler.ToListAsync(), "OgretmenId","AdSoyad");
+            return View(model);
+            
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -46,7 +53,7 @@ namespace efcoreApp.Controllers
             var kurs = await _context
                                 .Kurslar
                                 .Include(x => x.KursKayitlari)
-                                .ThenInclude(x=>x.Ogrenci)
+                                .ThenInclude(x => x.Ogrenci)
                                 .Select(k => new KursViewModel
                                 {
                                     KursId = k.KursId,
@@ -80,7 +87,7 @@ namespace efcoreApp.Controllers
                     _context.Update(new Kurs(){ KursId = model.KursId, Baslik=model.Baslik, OgretmenId=model.OgretmenId});
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateException)
                 {
                     if(!_context.Kurslar.Any(o => o.KursId == model.KursId))
                     {
